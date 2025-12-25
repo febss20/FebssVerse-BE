@@ -1,0 +1,240 @@
+// Prisma Schema for Portfolio CMS
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  profile        Profile?
+  projects       Project[]
+  articles       Article[]
+  skills         Skill[]
+  experiences    Experience[]
+  certifications Certification[]
+  seoSettings    SEOSetting[]
+
+  @@map("users")
+}
+
+model Profile {
+  id          String  @id @default(uuid())
+  userId      String  @unique @map("user_id")
+  fullName    String  @map("full_name")
+  title       String? 
+  bio         String? @db.Text
+  avatarUrl   String? @map("avatar_url")
+  resumeUrl   String? @map("resume_url")
+  location    String?
+  socialLinks Json?   @default("{}") @map("social_links")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+model Project {
+  id           String    @id @default(uuid())
+  userId       String    @map("user_id")
+  title        String
+  slug         String    @unique
+  description  String?   @db.Text
+  content      String?   @db.Text
+  thumbnailUrl String?   @map("thumbnail_url")
+  demoUrl      String?   @map("demo_url")
+  repoUrl      String?   @map("repo_url")
+  status       ProjectStatus @default(DRAFT)
+  featured     Boolean   @default(false)
+  startDate    DateTime? @map("start_date")
+  endDate      DateTime? @map("end_date")
+  order        Int       @default(0)
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  images       ProjectImage[]
+  technologies Technology[]   @relation("ProjectTechnologies")
+
+  @@map("projects")
+}
+
+model ProjectImage {
+  id        String  @id @default(uuid())
+  projectId String  @map("project_id")
+  url       String
+  altText   String? @map("alt_text")
+  order     Int     @default(0)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_images")
+}
+
+model Technology {
+  id       String  @id @default(uuid())
+  name     String  @unique
+  iconUrl  String? @map("icon_url")
+  color    String? 
+
+  projects Project[] @relation("ProjectTechnologies")
+
+  @@map("technologies")
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Article {
+  id          String        @id @default(uuid())
+  userId      String        @map("user_id")
+  categoryId  String?       @map("category_id")
+  title       String
+  slug        String        @unique
+  excerpt     String?       @db.Text
+  content     String?       @db.Text
+  coverImage  String?       @map("cover_image")
+  status      ArticleStatus @default(DRAFT)
+  featured    Boolean       @default(false)
+  readTime    Int?          @map("read_time") 
+  publishedAt DateTime?     @map("published_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  tags     Tag[]     @relation("ArticleTags")
+
+  @@map("articles")
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+
+  articles Article[]
+
+  @@map("categories")
+}
+
+model Tag {
+  id   String @id @default(uuid())
+  name String @unique
+  slug String @unique
+
+  articles Article[] @relation("ArticleTags")
+
+  @@map("tags")
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Skill {
+  id          String @id @default(uuid())
+  userId      String @map("user_id")
+  categoryId  String? @map("category_id")
+  name        String
+  proficiency Int    @default(0) 
+  order       Int    @default(0)
+
+  user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category SkillCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@map("skills")
+}
+
+model SkillCategory {
+  id    String @id @default(uuid())
+  name  String @unique
+  order Int    @default(0)
+
+  skills Skill[]
+
+  @@map("skill_categories")
+}
+
+model Experience {
+  id          String         @id @default(uuid())
+  userId      String         @map("user_id")
+  company     String
+  position    String
+  location    String?
+  description String?        @db.Text
+  startDate   DateTime       @map("start_date")
+  endDate     DateTime?      @map("end_date")
+  isCurrent   Boolean        @default(false) @map("is_current")
+  type        ExperienceType @default(WORK)
+  order       Int            @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("experiences")
+}
+
+enum ExperienceType {
+  WORK
+  EDUCATION
+  ORGANIZATION
+  VOLUNTEER
+}
+
+model Certification {
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  name          String
+  issuer        String
+  credentialId  String?   @map("credential_id")
+  credentialUrl String?   @map("credential_url")
+  issueDate     DateTime  @map("issue_date")
+  expiryDate    DateTime? @map("expiry_date")
+  imageUrl      String?   @map("image_url")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("certifications")
+}
+
+model SEOSetting {
+  id              String  @id @default(uuid())
+  userId          String  @map("user_id")
+  pageKey         String  @map("page_key") 
+  metaTitle       String? @map("meta_title")
+  metaDescription String? @map("meta_description") @db.Text
+  ogImage         String? @map("og_image")
+  structuredData  Json?   @default("{}") @map("structured_data")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pageKey])
+  @@map("seo_settings")
+}
+
+model ContactMessage {
+  id        String   @id @default(uuid())
+  name      String
+  email     String
+  subject   String?
+  message   String   @db.Text
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("contact_messages")
+}
