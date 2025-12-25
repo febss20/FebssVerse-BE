@@ -101,6 +101,7 @@ router.post(
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
  *         description: Experience ID
  *     requestBody:
  *       required: true
@@ -157,6 +158,7 @@ router.put(
  *         required: true
  *         schema:
  *           type: string
+ *           format: uuid
  *         description: Experience ID
  *     responses:
  *       200:
