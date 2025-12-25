@@ -69,9 +69,19 @@ router.get(
  *     tags: [Contact]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Message ID
  *     responses:
  *       200:
  *         description: Message marked as read
+ *       404:
+ *         description: Message not found
  */
 router.put(
   "/:id/read",
@@ -87,9 +97,19 @@ router.put(
  *     tags: [Contact]
  *     security:
  *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *           format: uuid
+ *         description: Message ID
  *     responses:
  *       200:
  *         description: Message deleted
+ *       404:
+ *         description: Message not found
  */
 router.delete(
   "/:id",
