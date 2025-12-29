@@ -16,3 +16,19 @@ export interface ServiceResponse<T> {
   data?: T;
   error?: string;
 }
+
+export interface UploadedFileResponse {
+  id: string;
+  publicId: string;
+  url: string;
+  secureUrl: string;
+  filename: string;
+  originalName?: string;
+  format: string;
+  width?: number;
+  height?: number;
+  bytes: number;
+  resourceType: string;
+  folder?: string;
+  createdAt: Date;
+}

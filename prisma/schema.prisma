@@ -238,3 +238,25 @@ model ContactMessage {
 
   @@map("contact_messages")
 }
+
+model UploadedFile {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  publicId     String   @unique @map("public_id")
+  url          String
+  secureUrl    String   @map("secure_url")
+  filename     String
+  originalName String?  @map("original_name")
+  format       String
+  resourceType String   @map("resource_type")
+  bytes        Int
+  width        Int?
+  height       Int?
+  folder       String?
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([folder])
+  @@map("uploaded_files")
+}
+

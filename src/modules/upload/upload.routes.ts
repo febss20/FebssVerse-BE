@@ -29,6 +29,30 @@ const upload = multer({
 
 /**
  * @swagger
+ * /api/admin/upload/files:
+ *   get:
+ *     summary: Get all uploaded files from Cloudinary
+ *     tags: [Upload]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: folder
+ *         schema:
+ *           type: string
+ *         description: Folder prefix to filter files (default portfolio-cms)
+ *     responses:
+ *       200:
+ *         description: List of uploaded files
+ */
+router.get(
+  "/files",
+  authenticate,
+  asyncHandler(uploadController.getFiles.bind(uploadController))
+);
+
+/**
+ * @swagger
  * /api/admin/upload:
  *   post:
  *     summary: Upload file to Cloudinary
